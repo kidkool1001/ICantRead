@@ -16,7 +16,7 @@ namespace ICantRead
         private void Awake()
         {
             new TimePatch().Enable();
-            Logger.LogInfo("Embracing Illiteracy.. (I Can't Read Loaded)");
+            Logger.LogInfo("I can't read... but now I can tell the time!");
         }
     }
 
