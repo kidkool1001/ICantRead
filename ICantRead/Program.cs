@@ -55,6 +55,7 @@ namespace ICantRead
         private void LateUpdate()
         {
             if (!ICantReadPlugin.EnableMod.Value) return;
+
             foreach (var label in _labels)
             {
                 if (string.IsNullOrEmpty(label.text)) continue;
@@ -67,7 +68,17 @@ namespace ICantRead
                     DateTimeStyles.None,
                     out DateTime dt))
                 {
-                    label.text = dt.ToString("hh:mm:ss") + $"<line-height=0.7><size=40%>{dt.ToString("tt")}</size></line-height>";
+                    string time = dt.ToString("h:mm:ss");
+                    string ampm = $"<line-height=0.7><size=40%>{dt:tt}</size></line-height>";
+
+                    string finalText = $"{time} {ampm}";
+
+                    if ((dt.Hour == 4 || dt.Hour == 16) && dt.Minute == 20)
+                    {
+                        finalText = $"<color=#00FF00>{finalText}</color>";
+                    }
+
+                    label.text = finalText;
                 }
             }
         }
