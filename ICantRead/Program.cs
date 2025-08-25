@@ -7,14 +7,17 @@ using System.Globalization;
 using System.Reflection;
 using EFT.UI.Matchmaker;
 using SPT.Reflection.Patching;
+using BepInEx.Configuration;
 
 namespace ICantRead
 {
     [BepInPlugin("com.kidkool1001.icantread", "I Can't Read", "1.0.0")]
     public class ICantReadPlugin : BaseUnityPlugin
     {
+        public static ConfigEntry<bool> EnableMod;
         private void Awake()
         {
+            EnableMod = Config.Bind("General", "Enabled",  true, "Enable or disable 12-hour time format.");
             new TimePatch().Enable();
             Logger.LogInfo("I can't read... but now I can tell the time!");
         }
@@ -51,6 +54,7 @@ namespace ICantRead
 
         private void LateUpdate()
         {
+            if (!ICantReadPlugin.EnableMod.Value) return;
             foreach (var label in _labels)
             {
                 if (string.IsNullOrEmpty(label.text)) continue;
