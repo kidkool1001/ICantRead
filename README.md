@@ -6,7 +6,7 @@ Tiny mod for SPT that changes the 24hr raid times to 12hr with AM/PM.
 
 ### Example
 - **Before:** `18:45:36`  
-- **After:** `06:45:36 PM`
+- **After:** `6:45:36 PM`
 
 ---
 
