@@ -11,16 +11,16 @@ using BepInEx.Configuration;
 
 namespace ICantRead
 {
-    [BepInPlugin("com.kidkool1001.icantread", "I Can't Read", "1.0.0")]
+    [BepInPlugin("com.kidkool1001.icantread", "I Can't Read", "1.0.2")]
     public class ICantReadPlugin : BaseUnityPlugin
     {
         public static ConfigEntry<bool> EnableMod;
-        public static ConfigEntry<int> IlliteracySlider;
+        public static ConfigEntry<int> IntensitySlider;
         private void Awake()
         {
             EnableMod = Config.Bind("General", "Enabled", true, "Enable or disable 12-hour time format.");
-            IlliteracySlider = Config.Bind("General", "Illiteracy Levels", 0,
-                new ConfigDescription("0 = H:MM:SS, 1 = H:MM, 2 = Day/Night Only",
+            IntensitySlider = Config.Bind("General", "Intensity", 0,
+                new ConfigDescription("0 = H:MM:SS, 1 = H:MM, 2 = Day / Night strings",
                 new AcceptableValueRange<int>(0, 2)));
             new TimePatch().Enable();
             Logger.LogInfo("I can't read... but now I can tell the time!");
@@ -74,28 +74,26 @@ namespace ICantRead
                 {
                     string finalText = "";
 
-                    switch (ICantReadPlugin.IlliteracySlider.Value)
+                    switch (ICantReadPlugin.IntensitySlider.Value)
                     {
                         case 0:
-                            // Full H:MM:SS + AM/PM
+                            // H:MM:SS
                             finalText = $"{dt:h:mm:ss} <line-height=0.7><size=40%>{dt:tt}</size></line-height>";
                             break;
 
                         case 1:
-                            // Drop seconds → H:MM + AM/PM
+                            // H:MM
                             finalText = $"{dt:h:mm} <line-height=0.7><size=40%>{dt:tt}</size></line-height>";
                             break;
 
                         case 2:
-                            // Replace with DAY or NIGHT
-                            finalText = IsDaytime(dt)
-                                ? "DAY"
-                                : "NIGHT";
+                            // SUNRISE, DAY, SUNSET, NIGHT
+                            finalText = GetTime(dt);
                             break;
                     }
 
                     // lil easter egg
-                    if ((dt.Hour == 4 || dt.Hour == 16) && dt.Minute == 20 && ICantReadPlugin.IlliteracySlider.Value != 2)
+                    if ((dt.Hour == 4 || dt.Hour == 16) && dt.Minute == 20 && ICantReadPlugin.IntensitySlider.Value != 2)
                     {
                         finalText = $"<color=#00FF00>{finalText}</color>";
                     }
@@ -104,9 +102,24 @@ namespace ICantRead
                 }
             }
         }
-        private bool IsDaytime(DateTime dt)
+        private string GetTime(DateTime dt)
         {
-            return dt.Hour >= 6 && dt.Hour < 22;
+            int totalMinutes = dt.Hour * 60 + dt.Minute;
+
+            int sunriseStart = 5 * 60 + 45;    // 05:45
+            int dayStart = 6 * 60 + 30;        // 06:30
+            int sunsetStart = 21 * 60 + 30;    // 21:30
+            int nightStart = 21 * 60 + 50;     // 21:50
+
+            if (totalMinutes >= sunriseStart && totalMinutes < dayStart)
+                return "<color=#FFD580>SUNRISE</color>";
+            else if (totalMinutes >= dayStart && totalMinutes < sunsetStart)
+                return "<color=#FFFF00>DAY</color>";
+            else if (totalMinutes >= sunsetStart && totalMinutes < nightStart)
+                return "<color=#FF4500>SUNSET</color>";
+            else
+                return "<color=#00BFFF>NIGHT</color>";
         }
+
     }
 }
